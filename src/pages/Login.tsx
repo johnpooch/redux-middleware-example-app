@@ -1,25 +1,16 @@
 import { Button, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import React, { useEffect } from "react";
-import { LogLevel, Severity, TelemetryEventName } from "../store/types";
-import { authService } from "../store/service";
-import { actions as feedbackActions } from "../store/feedback";
-import {
-  logEvent,
-  registerGAEvent,
-  registerGAPageview,
-  sendTelemetryEvent,
-} from "../utils";
 import * as Yup from "yup";
-import { useNavigate } from "react-router";
+import {
+  actions as uiActions,
+  FormName,
+  LoginFormValues,
+  PageName,
+} from "../store/ui";
 import { useDispatch } from "react-redux";
 
-interface FormValues {
-  email: string;
-  password: string;
-}
-
-const initialFormValues: FormValues = {
+const initialFormValues: LoginFormValues = {
   email: "",
   password: "",
 };
@@ -32,74 +23,14 @@ const validationSchema = Yup.object().shape({
 const Login = (): React.ReactElement => {
   const dispatch = useDispatch();
 
-  // Using rtk-query to reduce data-fetching boilerplate
-  const [login, loginQueryStatus] = authService.useLoginMutation();
-
-  // Using react-router useNavigate to handle redirects
-  const navigate = useNavigate();
-
-  const submit = (values: FormValues) => {
-    registerGAEvent("Login form submit");
-    logEvent(LogLevel.Info, "Login form submit");
-    sendTelemetryEvent(TelemetryEventName.FormInteraction, "Login form submit");
-    sendTelemetryEvent(TelemetryEventName.ApiStart, "Login");
-    void login(values);
-  };
-
-  /*
-   * On page load:
-   * -> Register Google Analytics pageview
-   * -> Create log event
-   * -> Send telemetry event
-   */
+  // Could be nicely refactored into a custom hook.
   useEffect(() => {
-    registerGAPageview("Login");
-    logEvent(LogLevel.Info, "Login page loaded");
-    sendTelemetryEvent(TelemetryEventName.PageLoad, "Login page loaded");
+    dispatch(uiActions.loadPage(PageName.Login));
   }, []);
 
-  /*
-   * Handle success and error scenarios
-   *
-   * On success:
-   * -> Register Google Analytics event
-   * -> Create log event
-   * -> Send telemetry event
-   * -> Add feedback
-   * -> Set token in local storage
-   *
-   * On error:
-   * -> Register Google Analytics event
-   * -> Create log event
-   * -> Send telemetry event
-   * -> Add feedback
-   */
-  useEffect(() => {
-    if (loginQueryStatus.isSuccess) {
-      registerGAEvent("Login successful");
-      logEvent(LogLevel.Success, "Login successful");
-      sendTelemetryEvent(TelemetryEventName.ApiStop, "Login successful");
-      dispatch(
-        feedbackActions.add({
-          severity: Severity.Success,
-          message: "Logged in!",
-        })
-      );
-      const { token } = loginQueryStatus.data;
-      localStorage.setItem("token", token);
-      navigate("/");
-    } else if (loginQueryStatus.isError) {
-      registerGAEvent("Login failed");
-      logEvent(LogLevel.Success, "Login failed");
-      sendTelemetryEvent(TelemetryEventName.ApiStop, "Login failed");
-      dispatch(
-        feedbackActions.add({
-          severity: Severity.Error,
-          message: "Login failed.",
-        })
-      );
-    }
-  }, [loginQueryStatus.isSuccess, loginQueryStatus.isError]);
+  const submit = (values: LoginFormValues) => {
+    dispatch(uiActions.submitForm({ name: FormName.Login, values }));
+  };
 
   // Formik config to reduce form boilerplate
   const { errors, values, handleChange, handleSubmit } = useFormik({

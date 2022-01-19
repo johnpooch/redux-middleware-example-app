@@ -1,19 +1,14 @@
 import { Button, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import React, { useEffect } from "react";
-import { LogLevel, Severity, TelemetryEventName } from "../store/types";
-import { authService } from "../store/service";
-import { actions as feedbackActions } from "../store/feedback";
 import {
-  logEvent,
-  registerGAEvent,
-  registerGAPageview,
-  sendTelemetryEvent,
-} from "../utils";
+  actions as uiActions,
+  FormName,
+  PageName,
+  ChangePasswordFormValues,
+} from "../store/ui";
 import * as Yup from "yup";
-import { useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
-import { useSelectEmail } from "../hooks/selectors";
 
 interface FormValues {
   oldPassword: string;
@@ -38,84 +33,13 @@ const validationSchema = Yup.object().shape({
 const Register = (): React.ReactElement => {
   const dispatch = useDispatch();
 
-  // Using rtk-query to reduce data-fetching boilerplate
-  const [changePassword, changePasswordQueryStatus] =
-    authService.useChangePasswordMutation();
-
-  // Get email from store for form submission
-  const email = useSelectEmail() as string;
-
-  // Using react-router useNavigate to handle redirects
-  const navigate = useNavigate();
-
-  const submit = (values: FormValues) => {
-    registerGAEvent("Change password form submit");
-    logEvent(LogLevel.Info, "Change password form submit");
-    sendTelemetryEvent(
-      TelemetryEventName.FormInteraction,
-      "Change password form submit"
-    );
-    sendTelemetryEvent(TelemetryEventName.ApiStart, "Change password");
-    void changePassword({ ...values, email });
-  };
-
-  /*
-   * On page load:
-   * -> Register Google Analytics pageview
-   * -> Create log event
-   * -> Send telemetry event
-   */
   useEffect(() => {
-    registerGAPageview("Change password");
-    logEvent(LogLevel.Info, "Change password page loaded");
-    sendTelemetryEvent(
-      TelemetryEventName.PageLoad,
-      "Change password page loaded"
-    );
+    dispatch(uiActions.loadPage(PageName.ChangePassword));
   }, []);
 
-  /*
-   * Handle success and error scenarios
-   *
-   * On success:
-   * -> Register Google Analytics event
-   * -> Create log event
-   * -> Send telemetry event
-   * -> Add feedback
-   *
-   * On error:
-   * -> Register Google Analytics event
-   * -> Create log event
-   * -> Send telemetry event
-   * -> Add feedback
-   */
-  useEffect(() => {
-    if (changePasswordQueryStatus.isSuccess) {
-      registerGAEvent("Change password successful");
-      logEvent(LogLevel.Success, "Change password successful");
-      sendTelemetryEvent(
-        TelemetryEventName.ApiStop,
-        "Change password successful"
-      );
-      dispatch(
-        feedbackActions.add({
-          severity: Severity.Success,
-          message: "Password updated!",
-        })
-      );
-      navigate("/");
-    } else if (changePasswordQueryStatus.isError) {
-      registerGAEvent("Change password failed");
-      logEvent(LogLevel.Success, "Change password failed");
-      sendTelemetryEvent(TelemetryEventName.ApiStop, "Change password failed");
-      dispatch(
-        feedbackActions.add({
-          severity: Severity.Error,
-          message: "Change password failed.",
-        })
-      );
-    }
-  }, [changePasswordQueryStatus.isSuccess, changePasswordQueryStatus.isError]);
+  const submit = (values: ChangePasswordFormValues) => {
+    dispatch(uiActions.submitForm({ name: FormName.ChangePassword, values }));
+  };
 
   // Formik config to reduce form boilerplate
   const { errors, values, handleChange, handleSubmit } = useFormik({
