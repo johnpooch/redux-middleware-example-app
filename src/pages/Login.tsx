@@ -1,4 +1,4 @@
-import { Button, TextField } from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import React, { useEffect } from "react";
 import { LogLevel, Severity, TelemetryEventName } from "../store/types";
@@ -111,6 +111,7 @@ const Login = (): React.ReactElement => {
   return (
     <div>
       <form onSubmit={handleSubmit}>
+        <Typography variant="h4">Log in</Typography>
         <TextField
           label="Email"
           name="email"
@@ -130,7 +131,7 @@ const Login = (): React.ReactElement => {
           fullWidth
           value={values.password}
         />
-        <Button type="submit" color="primary">
+        <Button variant="contained" type="submit" color="primary">
           Log in
         </Button>
       </form>

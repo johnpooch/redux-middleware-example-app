@@ -2,11 +2,7 @@ import { Typography } from "@mui/material";
 import React from "react";
 
 const Home = (): React.ReactElement => {
-  return (
-    <div>
-      <Typography>Home page</Typography>
-    </div>
-  );
+  return <Typography variant="h4">Home page</Typography>;
 };
 
 export default Home;

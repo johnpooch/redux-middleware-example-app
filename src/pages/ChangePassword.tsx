@@ -1,4 +1,4 @@
-import { Button, TextField } from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import React, { useEffect } from "react";
 import { LogLevel, Severity, TelemetryEventName } from "../store/types";
@@ -127,12 +127,14 @@ const Register = (): React.ReactElement => {
   return (
     <div>
       <form onSubmit={handleSubmit}>
+        <Typography variant="h4">Change password</Typography>
         <TextField
           label="Old password"
           name="oldPassword"
           error={Boolean(errors.oldPassword)}
           helperText={errors.oldPassword}
           onChange={handleChange}
+          type="password"
           fullWidth
           value={values.oldPassword}
         />
@@ -156,7 +158,7 @@ const Register = (): React.ReactElement => {
           fullWidth
           value={values.passwordConfirmation}
         />
-        <Button type="submit" color="primary">
+        <Button variant="contained" type="submit" color="primary">
           Change password
         </Button>
       </form>

@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+
+import "./main.css";
 import FeedbackWrapper from "./components/FeedbackWrapper";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
